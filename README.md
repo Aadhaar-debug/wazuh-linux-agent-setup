@@ -10,7 +10,9 @@ Tested end-to-end on a **Raspberry Pi (Debian 13 "trixie", arm64)** against a **
 
 | Path | What it is |
 |------|------------|
-| [`install-wazuh-agent.sh`](install-wazuh-agent.sh) | One-shot installer: repo → package → `ossec.conf` → enroll → start → verify |
+| [`install-wazuh-agent.sh`](install-wazuh-agent.sh) | One-shot Linux installer: repo → package → `ossec.conf` → enroll → start → verify |
+| [`install-wazuh-agent-macos.sh`](install-wazuh-agent-macos.sh) | macOS equivalent (Apple silicon & Intel). Installs the `.pkg` if missing, or repoints an existing agent |
+| [`docs/my-lab-registration.md`](docs/my-lab-registration.md) | How I registered my **Mac and Raspberry Pi** with my Wazuh VM, with SCA on both. Includes the NAT→bridged fix and the Docker-vs-native conflict |
 | [`config/ossec.conf.agent-example`](config/ossec.conf.agent-example) | The `<client>` and `<sca>` blocks the script writes, annotated |
 | [`docs/raspberry-pi-walkthrough.md`](docs/raspberry-pi-walkthrough.md) | Step-by-step record of setting up a real Raspberry Pi, including the problems hit and how they were fixed |
 | [`docs/manual-setup.md`](docs/manual-setup.md) | The same steps done by hand, without the script |
@@ -54,6 +56,14 @@ sudo ./install-wazuh-agent.sh -m <MANAGER_IP> -n Raspberry-pi -g default -v 4.14
 | `-v` | Agent version to install (match your manager) | latest 4.x |
 | `-p` | Enrollment password, if the manager has `<use_password>yes</use_password>` | none |
 | `-i` | SCA scan interval | `12h` |
+
+### macOS
+
+```bash
+sudo ./install-wazuh-agent-macos.sh -m <MANAGER_IP> -n tweakMacOS -g default -v 4.14.9
+```
+
+This takes the same flags (`-m -n -g -v -i`). If the Mac is already registered and you leave out `-n`, it keeps the existing agent name. It enables SCA with the bundled `cis_apple_macOS_*.yml` policy.
 
 > **Agent names cannot contain spaces.** Allowed characters are letters, digits, `.`, `-` and `_`. The manager rejects `Raspberry pi` with `Invalid agent name`, so use `Raspberry-pi`.
 

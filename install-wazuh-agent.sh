@@ -172,11 +172,13 @@ CLIENT_BLOCK="$CLIENT_BLOCK" SCA_BLOCK="$SCA_BLOCK" perl -0pi -e '
   else          { s{(</ossec_config>)}{$ENV{SCA_BLOCK}\n\n$1}s }
 ' "$CONF"
 
-# Validate XML before restarting (agent refuses to start on bad config)
-if command -v xmllint >/dev/null; then
-  # ossec.conf has multiple root elements; wrap it for validation
-  { echo "<root>"; cat "$CONF"; echo "</root>"; } | xmllint --noout - && echo "  ossec.conf is well-formed"
-fi
+# Sanity-check the blocks we wrote. (Don't run a strict XML parser over the whole file:
+# Wazuh's own default <command> entries contain raw '&&', which Wazuh accepts but xmllint rejects.)
+for tag in client enrollment sca policies; do
+  [ "$(grep -c "<$tag>" "$CONF")" -ge 1 ] && [ "$(grep -c "</$tag>" "$CONF")" -ge 1 ] \
+    || { echo "  ERROR: <$tag> block missing after edit; restoring backup"; cp -a "$(ls -t $CONF.bak.* | head -1)" "$CONF"; exit 1; }
+done
+echo "  <client>, <enrollment> and <sca> blocks written"
 
 # ---------------------------------------------------------------------------
 log "5/6 Enabling and starting wazuh-agent"
