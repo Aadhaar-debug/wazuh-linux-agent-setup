@@ -15,6 +15,7 @@ Tested end-to-end on a **Raspberry Pi (Debian 13 "trixie", arm64)** against a **
 | [`docs/my-lab-registration.md`](docs/my-lab-registration.md) | How I registered my **Mac and Raspberry Pi** with my Wazuh VM, with SCA on both. Includes the NAT→bridged fix and the Docker-vs-native conflict |
 | [`config/ossec.conf.agent-example`](config/ossec.conf.agent-example) | The `<client>` and `<sca>` blocks the script writes, annotated |
 | [`docs/raspberry-pi-walkthrough.md`](docs/raspberry-pi-walkthrough.md) | Step-by-step record of setting up a real Raspberry Pi, including the problems hit and how they were fixed |
+| [`docs/agent-commands.md`](docs/agent-commands.md) | Start / stop / restart / status commands for the agent on Raspberry Pi (Linux) and macOS |
 | [`docs/manual-setup.md`](docs/manual-setup.md) | The same steps done by hand, without the script |
 | [`docs/troubleshooting.md`](docs/troubleshooting.md) | Common failures (agent never connects, invalid name, VM in NAT mode, dpkg conflicts…) |
 
