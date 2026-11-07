@@ -1,0 +1,48 @@
+<!--
+  Relevant excerpts of /var/ossec/etc/ossec.conf on a configured agent.
+  Everything else in the file is left as the package generated it.
+  Replace <MANAGER_IP> with your manager's address.
+-->
+<ossec_config>
+
+  <!-- ===================== Manager connection + enrollment ===================== -->
+  <client>
+    <server>
+      <address><MANAGER_IP></address>   <!-- was MANAGER_IP placeholder after install -->
+      <port>1514</port>                 <!-- agent <-> manager communication -->
+      <protocol>tcp</protocol>
+    </server>
+
+    <!-- Auto-enrollment: on first start the agent requests a key from wazuh-authd
+         on port 1515 and stores it in /var/ossec/etc/client.keys -->
+    <enrollment>
+      <enabled>yes</enabled>
+      <manager_address><MANAGER_IP></manager_address>
+      <port>1515</port>
+      <agent_name>Raspberry-pi</agent_name>   <!-- letters, digits, . - _ only. NO spaces -->
+      <groups>default</groups>                <!-- comma-separated list of groups -->
+      <!-- Only if the manager requires a password (authd <use_password>yes</use_password>):
+      <authorization_pass_path>etc/authd.pass</authorization_pass_path> -->
+    </enrollment>
+
+    <config-profile>debian, debian13</config-profile>
+    <notify_time>20</notify_time>        <!-- keepalive every 20 s -->
+    <time-reconnect>60</time-reconnect>
+    <auto_restart>yes</auto_restart>     <!-- restart when the group's shared config changes -->
+    <crypto_method>aes</crypto_method>
+  </client>
+
+  <!-- ===================== Security Configuration Assessment ===================== -->
+  <sca>
+    <enabled>yes</enabled>
+    <scan_on_start>yes</scan_on_start>   <!-- run a scan as soon as the agent starts -->
+    <interval>12h</interval>             <!-- then re-scan every 12 hours -->
+    <skip_nfs>yes</skip_nfs>
+    <policies>
+      <!-- Policies live in /var/ossec/ruleset/sca/. The agent package ships the one
+           matching the OS. List them explicitly so it's obvious which run. -->
+      <policy enabled="yes">ruleset/sca/cis_debian13.yml</policy>
+    </policies>
+  </sca>
+
+</ossec_config>
