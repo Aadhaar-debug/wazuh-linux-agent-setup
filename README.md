@@ -15,6 +15,7 @@ Tested end-to-end on a **Raspberry Pi (Debian 13 "trixie", arm64)** against a **
 | [`docs/my-lab-registration.md`](docs/my-lab-registration.md) | How I registered my **Mac and Raspberry Pi** with my Wazuh VM, with SCA on both. Includes the NAT→bridged fix and the Docker-vs-native conflict |
 | [`config/ossec.conf.agent-example`](config/ossec.conf.agent-example) | The `<client>` and `<sca>` blocks the script writes, annotated |
 | [`docs/raspberry-pi-walkthrough.md`](docs/raspberry-pi-walkthrough.md) | Step-by-step record of setting up a real Raspberry Pi, including the problems hit and how they were fixed |
+| [`docs/enable-sca.md`](docs/enable-sca.md) | **How to enable SCA scans** on the Raspberry Pi and the Mac: per agent or centrally from the manager, plus where to see results |
 | [`docs/agent-commands.md`](docs/agent-commands.md) | Start / stop / restart / status commands for the agent on Raspberry Pi (Linux) and macOS |
 | [`docs/manual-setup.md`](docs/manual-setup.md) | The same steps done by hand, without the script |
 | [`docs/troubleshooting.md`](docs/troubleshooting.md) | Common failures (agent never connects, invalid name, VM in NAT mode, dpkg conflicts…) |
@@ -78,6 +79,34 @@ sca: INFO: Starting evaluation of policy: '/var/ossec/ruleset/sca/cis_debian13.y
 sca: INFO: Evaluation finished for policy '/var/ossec/ruleset/sca/cis_debian13.yml'
 Done. Agent 'Raspberry-pi' is connected to <MANAGER_IP> in group 'default'.
 ```
+
+---
+
+## Enabling SCA scans
+
+The scripts turn SCA on for you. To do it by hand, add this `<sca>` block to the agent's `ossec.conf`, then restart the agent:
+
+| | Raspberry Pi / Linux | macOS |
+|---|---|---|
+| Config file | `/var/ossec/etc/ossec.conf` | `/Library/Ossec/etc/ossec.conf` |
+| Policy | `ruleset/sca/cis_debian13.yml` | `ruleset/sca/cis_apple_macOS_26.x.yml` |
+| Restart | `sudo systemctl restart wazuh-agent` | `sudo /Library/Ossec/bin/wazuh-control restart` |
+
+```xml
+<sca>
+  <enabled>yes</enabled>
+  <scan_on_start>yes</scan_on_start>
+  <interval>12h</interval>
+  <skip_nfs>yes</skip_nfs>
+  <policies>
+    <policy enabled="yes">ruleset/sca/cis_debian13.yml</policy>   <!-- macOS: cis_apple_macOS_26.x.yml -->
+  </policies>
+</sca>
+```
+
+Check it with `sudo grep sca: <agent dir>/logs/ossec.log | tail`. You should see `Evaluation finished for policy ...`.
+
+**Full step-by-step guide:** [docs/enable-sca.md](docs/enable-sca.md). It covers both agents, what each setting means, enabling SCA for a whole group from the manager, reading the results in the dashboard, and troubleshooting.
 
 ---
 
